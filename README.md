@@ -5,7 +5,7 @@ This repo contains project done for course ELL729-Stochastic Control and Reinfor
 
 # Introduction
 
-As a part of the course project, we implemented the paper titled "*Model-free Reinforcement Learning that Transfers using Random Features*" [@paper]. We experimented the proposed algorithm in certain environments using *OpenAI Gym* and *MuJoCo* simulator. 
+As a part of the course project, we implemented the paper titled "*Model-free Reinforcement Learning that Transfers using Random Features*". We experimented the proposed algorithm in certain environments using *OpenAI Gym* and *MuJoCo* simulator. 
 
 The paper proposes a new approach to reinforcement learning (RL) that combines the benefits of model-free and model-based RL algorithms. The authors introduce a method for transferring behaviors across tasks with different reward functions by using model-free RL with randomly sampled features as reward to implicitly model long-horizon environment dynamics. They demonstrate that this approach enables quick adaptation to problems with new reward functions, while scaling to problems with high dimensional observations and long horizons. The paper provides theoretical justifications for the methodology and presents experimental results demonstrating its effectiveness in solving RL problems. Overall, the paper presents a promising new approach to RL that has potential for real-world applications.
 
@@ -24,19 +24,19 @@ Both approaches have their advantages and disadvantages depending on the specifi
 Typical model-free RL algorithms can struggle to transfer across tasks with different reward functions due to the following challenges:
 
 
-     **Overfitting to the specific reward function of the training task:** Model-free RL algorithms learn a policy that maximizes the expected cumulative reward for a specific reward function. If the reward function changes in a new task, the learned policy may not be optimal for the new task.
+1. **Overfitting to the specific reward function of the training task:** Model-free RL algorithms learn a policy that maximizes the expected cumulative reward for a specific reward function. If the reward function changes in a new task, the learned policy may not be optimal for the new task.
 
-     **Exploration-exploitation trade-off:** Model-free RL algorithms rely on exploration to discover optimal policies. When transferring to a new task, exploration may be less effective if the agent has already learned a good policy in the previous task.
+2. **Exploration-exploitation trade-off:** Model-free RL algorithms rely on exploration to discover optimal policies. When transferring to a new task, exploration may be less effective if the agent has already learned a good policy in the previous task.
 
-     **Curse of dimensionality:** Model-free RL algorithms can struggle with high-dimensional state spaces, which can make it difficult to generalize across tasks with different state spaces.
+3. **Curse of dimensionality:** Model-free RL algorithms can struggle with high-dimensional state spaces, which can make it difficult to generalize across tasks with different state spaces.
 
-     **Long horizons:** Model-free RL algorithms can struggle with long-horizon problems, where rewards are sparse and delayed over time. This can make it difficult to learn an optimal policy that takes into account long-term consequences of actions.
+4. **Long horizons:** Model-free RL algorithms can struggle with long-horizon problems, where rewards are sparse and delayed over time. This can make it difficult to learn an optimal policy that takes into account long-term consequences of actions.
     
 
 
 To address these challenges, various methods have been proposed in literature for transferring knowledge across tasks, such as transfer learning, meta-learning, and multi-task learning.
 # Proposed Approach
-**The approach proposed in [@paper** combines the benefits of model-free and model-based RL algorithms] by using model-free RL with randomly sampled features as reward to implicitly model long-horizon environment dynamics. This approach allows for quick adaptation to problems with new reward functions, while scaling to problems with high dimensional observations and long horizons.
+The approach proposed in paper combines the benefits of model-free and model-based RL algorithms by using model-free RL with randomly sampled features as reward to implicitly model long-horizon environment dynamics. This approach allows for quick adaptation to problems with new reward functions, while scaling to problems with high dimensional observations and long horizons.
 
 Specifically, the authors use a set of randomly sampled features of the state as a proxy for the environment dynamics. They then use a model-free RL algorithm to learn a set of Q-functions that map from states and actions to expected cumulative rewards. These Q-functions are learned using the randomly sampled features as reward, rather than the true reward function.
 
@@ -44,45 +44,41 @@ At test time, the learned Q-functions can be used with any reward function, allo
 
 The approach is described step-by-step below in Algorithm- in more detail:
 
-[H]
-
-
-[1]
  **Input:** 
-     Offline dataset D, where `D = \{(s_h^{m}, a_h^{m}, s_{h+1}^{m})\}_{h  [H], m  [M]}`, where `H` is the length of the trajectories, `M` is the total number of trajectories, `s_h^{m}` and `a_h^{m}` are the state and action taken respectively at the `h^{th}` timestep of the `m^{th}` trajectory - with the assumption that all transitions are collected under the same transition dynamics `T`.
+1. Offline dataset D, where ![Equation](https://latex.codecogs.com/png.latex?D=\{(s_h^m,a_h^m,s_{h+1}^m)\}_{h\in[H],m\in[M]}), where `H` is the length of the trajectories, `M` is the total number of trajectories, ![Equation](https://latex.codecogs.com/png.latex?s_h^{m}) and ![Equation](https://latex.codecogs.com/png.latex?a_h^{m}) are the state and action taken respectively at the ![Equation](https://latex.codecogs.com/png.latex?h^{th}) timestep of the ![Equation](https://latex.codecogs.com/png.latex?m^{th}) trajectory - with the assumption that all transitions are collected under the same transition dynamics `T`.
 
-     Distribution `p` over `^d`
+2. Distribution `p` over ![Equation](https://latex.codecogs.com/png.latex?R^d)
 
-     Number of random features `K`
+3. Number of random features `K`
 
 
  **Offline Training Phase:**
- Randomly sample `\{_k\}_{k  [K]}` with `_k  p` and construct the dataset: 
+ 1. Randomly sample ![Equation](https://latex.codecogs.com/png.latex?\{\theta_k\}_{k\in[K]}) with ![Equation](https://latex.codecogs.com/png.latex?\theta_k\sim{p}) and construct the dataset: 
 
-    D_{} = \{((s_1^m, a_{1:H}^m), _{h  [H]}{^{h-1}(s_h^m, a_h^m; _k)})\}_{m  [M], k  [K]}
+    ![Equation](https://latex.codecogs.com/png.latex?D_{\phi}=\\{((s_1^m,a_{1:H}^m),\sum_{h\in[H]}{\gamma^{h-1}\phi(s_h^m,a_h^m;\theta_k)})\\}_{m\in[M],k\in[K]})
 
-Here, `` is the discount factor, i.e., `  [0,1)`, and `(. , . ; _k)` is a neural network with weights `_k  ^d`. 
- Fit random Q-basis functions `(. , . ; _k): S  A^H  ` for `k  [K]` by minimizing the loss over the dataset `D_{}`, (where, `S` and `A` are the state and action space respectively):
+Here, ![Equation](https://latex.codecogs.com/png.latex?\gamma) is the discount factor, i.e., ![Equation](https://latex.codecogs.com/png.latex?\gamma\in[0,1)), and ![Equation](https://latex.codecogs.com/png.latex?\phi(.,.;\theta_k)) is a neural network with weights ![Equation](https://latex.codecogs.com/png.latex?\theta_k\in{R^d}). 
+
+2. Fit random Q-basis functions ![Equation](https://latex.codecogs.com/png.latex?\psi(.,.;\nu_k):S\times{A^H}\to{R}) for ![Equation](https://latex.codecogs.com/png.latex?k\in[K]) by minimizing the loss over the dataset ![Equation](https://latex.codecogs.com/png.latex?D_{\phi}), (where, `S` and `A` are the state and action space respectively):
 
 
-\{_k^*\}_{k  [K]} = argmin_{\{_k\}_{k  [K]}}{{M}} _{m  [M]}{((s_1^m, a_{1:H}^m; _k) - _{h  [H]}{^{h-1}(s_h^m, a_h^m; _k)})^2}
+![Equation](https://latex.codecogs.com/png.latex?\\{\nu_k^*\\}_{k\in[K]}=argmin_{\\{\nu_k\\}_{k\in[K]}}{\frac{1}{M}}\sum_{m\in[M]}{(\psi(s_1^m,a_{1:H}^m;\nu_k)-\sum_{h\in[H]}{\gamma^{h-1}\phi(s_h^m,a_h^m;\theta_k)})^2})
 
 
  **Online Planning Phase:**
- Fit the testing task's reward function `r(.,.)` with linear regression on random features:
+1. Fit the testing task's reward function `$r(.,.)$` with linear regression on random features:
 
 
-    w^* = argmin_w {{MH} _{h  [H],m [M]}{(r(s_h^m, a_h^m) - _{k [K]}{w_k(s_h^m, a_h^m; _k)})^2} +  \|w\|^2}
+  ![Equation](https://latex.codecogs.com/png.latex?w^*=argmin_w{\frac{1}{MH}\sum_{h\in[H],m\in[M]}{(r(s_h^m,a_h^m)-\sum_{k\in[K]}{w_k\phi(s_h^m,a_h^m;\theta_k)})^2}+\lambda\|w\|^2})
 
+2. Sample ![Equation](https://latex.codecogs.com/png.latex?s_1\in\mu_0)
 
- Sample `s_1  _0`
-
-     Randomly generate `N` sequence of actions `\{a_1^{n}, ... , a_H^{n}\}_{n  [N]}`
-     Find the best sequence such that
+3. Randomly generate `N` sequence of actions ![Equation](https://latex.codecogs.com/png.latex?\\{a_1^{n},...,a_H^{n}\\}_{n\in[N]})
+4. Find the best sequence such that
     
-    n_t^* = argmax_{n  [N]}{_{k  [K]}{w_k^* (s_t, a_{1:H}^n;_k^*)}}
+    ![Equation](https://latex.codecogs.com/png.latex?n_t^*=argmax_{n\in[N]}{_{k\in[K]}{w_k^*(s_t,a_{1:H}^n;\nu_k^*)}})
     
-    Execute `a_t^{n_t^*}` from the sequence `n_t^*`, observe the new state `s_{t+1}  T(s_t, a_t^{n_t^*})`
+    Execute ![Equation](https://latex.codecogs.com/png.latex?a_t^{n_t^*}) from the sequence ![Equation](https://latex.codecogs.com/png.latex?n_t^*), observe the new state ![Equation](https://latex.codecogs.com/png.latex?s_{t+1}\in{T}(s_t,a_t^{n_t^*}))
     
 
 
@@ -91,50 +87,44 @@ Here, `` is the discount factor, i.e., `  [0,1)`, and `(. , . ; _k)` is a neural
 
 
 # Implementation
-% Libraries used: mujoco_py, OpenAI Gym, 
-% Datasets used
-% Libraries used to train the model
-***Please refer to the code of our implementation attached at the end of the report***
-
-
 We used OpenAI Gym to create the simulation environment. Once, the environment was created, we fetched the observation space and action space of the environment to calculate `D` which is the dimension for the random features. Now our implementation is divided into 4 phases:
 
 
-     Offline Training
-     Online Planning
-     Policy Compliant Motion
-     Rendering and Visualisation of the trajectories
+1. Offline Training
+2. Online Planning
+3. Policy Compliant Motion
+4. Rendering and Visualisation of the trajectories
 
 
 ## Offline Training
-First, we created the dataset for offline training. This dataset will be denoted by `D_{}`. Given K random features, M samples, probability distribution p over `R^d` and discount factor ``, we will first sample random features `_k` as:
+First, we created the dataset for offline training. This dataset will be denoted by ![Equation](https://latex.codecogs.com/png.latex?D_{\phi}). Given K random features, M samples, probability distribution p over `$R^d$` and discount factor ![Equation](https://latex.codecogs.com/png.latex?\gamma), we will first sample random features ![Equation](https://latex.codecogs.com/png.latex?\theta_k) as:
 
 
-    `\{_k\}_{k  [K]}` with `_k  p`
+   ![Equation](https://latex.codecogs.com/png.latex?\\{\theta_k\\}_{k\in[K]}) with ![Equation](https://latex.codecogs.com/png.latex?\theta_k\sim{p})
 
 
 Using the above random features, we will form our dataset as:
 
-    `D_{} = \{((s_1^m, a_{1:H}^m), _{h  [H]}{^{h-1}(s_h^m, a_h^m; _k)})\}_{m  [M], k  [K]}`
+   ![Equation](https://latex.codecogs.com/png.latex?D_{\phi}=\\{((s_1^m,a_{1:H}^m),\sum_{h\in[H]}{\gamma^{h-1}\phi(s_h^m,a_h^m;\theta_k)})\\}_{m\in[M],k\in[K]})
 
 
-Then, we trained random Q-basis functions `(.,.,_k):S  A^H  R` function which is parameterised over `_k`. In our case, we trained K unit Linear layer with activation as tanh. The loss function used to train the paramaters: `_k` was mean squared loss:
+Then, we trained random Q-basis functions ![Equation](https://latex.codecogs.com/png.latex?\psi(.,.,\nu_k):S\times{A^H}\to{R}) function which is parameterised over ![Equation](https://latex.codecogs.com/png.latex?\nu_k). In our case, we trained K unit Linear layer with activation as tanh. The loss function used to train the paramaters: ![Equation](https://latex.codecogs.com/png.latex?\nu_k) was mean squared loss:
 
 
-    `_k^* = argmin_{_k}{{M}} _{m  [M]}{((s_1^m, a_{1:H}^m; _k) - _{h  [H]}{^{h-1}(s_h^m, a_h^m; _k)})^2}`
+   ![Equation](https://latex.codecogs.com/png.latex?\nu_k^*=argmin_{\nu_k}{\frac{1}{M}}\sum_{m\in[M]}{(\psi(s_1^m,a_{1:H}^m;\nu_k)-\sum_{h\in[H]}{\gamma^{h-1}\phi(s_h^m,a_h^m;\theta_k)})^2})
 
 
 ## Online Training
-First, we created the dataset for online planning. This dataset will be denoted by `D_{w}`. Given the K random features and M samples containing rewards r:
+First, we created the dataset for online planning. This dataset will be denoted by ![Equation](https://latex.codecogs.com/png.latex?D_{w}). Given the K random features and M samples containing rewards r:
 
 
-    `D_w = \{((s_h^m, a_h^m; _k)_{k  [K]}, r(s_h^m, a_h^m))\}_{m  [M], h  [H]}`
+   ![Equation](https://latex.codecogs.com/png.latex?D_w=\\{((s_h^m,a_h^m;\theta_k)_{k\in[K]},r(s_h^m,a_h^m))\\}_{m\in[M],h\in[H]})
 
 
 Using above dataset, we fit the parameters w using Linear Regression. The loss function used is described below:
 
 
-    `w^* = argmin_w {{MH} _{h  [H],m [M]}{(r(s_h^m, a_h^m) - _{k [K]}{w_k(s_h^m, a_h^m; _k)})^2} +  \|w\|^2}`
+   ![Equation](https://latex.codecogs.com/png.latex?w^*=argmin_w{\frac{1}{MH}\sum_{h\in[H],m\in[M]}{(r(s_h^m,a_h^m)-\sum_{k\in[K]}{w_k\phi(s_h^m,a_h^m;\theta_k)})^2}+\lambda\|w\|^2})
 
 
 This training is carried out in batches and hence SGDRegressor was used. Regularization was also used to smoothen the training and avoid any overfitting.
