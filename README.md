@@ -2,31 +2,6 @@
 
 This repo contains project done for course ELL729-Stochastic Control and Reinforcement Learning, taught by Prof. Arpan Chattopadhyay at IIT Delhi.
 
-[a4paper]{article}
-
- % Package to use full page
- % Package to tweak paragraph skipping
- % Package for drawing
-
-
-
-
-
-
-
-
-%
- }
-
-
-
-
-
-{Figure}
-
-
-
-
 
 # Introduction
 
