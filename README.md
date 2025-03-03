@@ -130,19 +130,19 @@ Using above dataset, we fit the parameters w using Linear Regression. The loss f
 This training is carried out in batches and hence SGDRegressor was used. Regularization was also used to smoothen the training and avoid any overfitting.
 
 ## Policy Compliant Motion
-Once we have trained parameters `_k^*` and `w_k^*`, we formed a method that can provide us with the most optimal action given the current state `s_t`. 
+Once we have trained parameters ![Equation](https://latex.codecogs.com/png.latex?\nu_k^*) and ![Equation](https://latex.codecogs.com/png.latex?w_k^*), we formed a method that can provide us with the most optimal action given the current state ![Equation](https://latex.codecogs.com/png.latex?s_t). 
 
-First, we randomly sample H actions N times to create N H-horizon action sequences `\{a_1^n, a_2^n,..., a_h^n\}_{n  [N]}`.
+First, we randomly sample H actions N times to create N H-horizon action sequences ![Equation](https://latex.codecogs.com/png.latex?\\{a_1^n,a_2^n,...,a_h^n\\}_{n\in[N]}).
 
 The below equation is used to find the best sequence out of the lot:
 
-    `n_t = argmax_n{_{k  [K]}{w_k^* (s_t, a_{1:H}^n;_k^*)}}`
+   ![Equation](https://latex.codecogs.com/png.latex?n_t=argmax_n{_{k\in[K]}{w_k^*(s_t,a_{1:H}^n;\nu_k^*)}})
 
 
 And the best immediate action is taken to be:
 
 
-    `a_t = a_1^{n_t^*}`
+   ![Equation](https://latex.codecogs.com/png.latex?a_t=a_1^{n_t^*})
 
 This is carried out every step to find the optimal action.
 
@@ -153,67 +153,66 @@ We used media\_py library of python to visualise the motion of agent in the envi
 % Hyperparameters for randomly trained model and expertly trained model
 % Results for both cases compared with the random model
 % Some plots
-Hopper-v2 environment was used to create the simulation. The observation space in the environment is 11-dimensional and action space is 3-dimensional with action values lying in the range of [-1,1]. These made our random features `_k` to belong to `R^{14}`
+Hopper-v2 environment was used to create the simulation. The observation space in the environment is 11-dimensional and action space is 3-dimensional with action values lying in the range of [-1,1]. These made our random features ![Equation](https://latex.codecogs.com/png.latex?\theta_k) to belong to ![Equation](https://latex.codecogs.com/png.latex?R^{14})
 
 In order to train our agent for both the phases, we used two datasets: 
 
-     Hopper-v2-random
-     Hopper-v2-expert
+     1. Hopper-v2-random
+     2. Hopper-v2-expert
 
 
 ## Hopper-v2-random
 After creating the hopper-v2 environment using OpenAI Gym, we sampled M paths of H-horizon each to create the samples. The details of the dataset is provided below:
 
-    {c c c}
-    **Number of paths (M)** & **Horizon length (H)** & **Average total reward**\\
-     10000 & 200 & 19.734
+|Number of paths (M)|Horizon length (H)|Average total reward|
+|----------|-----|----|
+|10000 |200 |19.734|
 
 
 
 We kept number of Q-basis functions (K) = 256. Training the model using these hyperparameters, we tested on 1000 trajectories with different starting states. Number of epochs were set to 2500. The training graph of the model is shown here. 
 
 
-[scale=0.5]{random_training.png}        
-
+![Image Random Training](./img/random_training.png)
 
 We also tested out 1000 trajectories with random policy with same starting states to calculate some metrics.
 
 Below graph shows the reward progression of a trajectory from random policy and policy trained on Hopper-v2-expert.
 
 
-[scale=0.5]{random_testing.png}        
+![Image Random Training](./img/random_testing.png)       
 
 
 ## Hopper-v2-expert
 We used the Hopper-v2-expert dataset available at OpenAI Gym. The number of paths in the dataset is 3213. We first took a window of size H=200 to extract H-horizon trajectories. The paths with length lesser than H were appended with 0-actions and 0-rewards with static observations. This provided us with a dataset of following specifications:
 
 
-    {c c c}
-    **Number of paths (M)** & **Horizon length (H)** & **Average total reward**\\
-     138000 & 200 & 201.654
+|Number of paths (M)|Horizon length (H)|Average total reward|
+|--|--|--|
+|138000 | 200 | 201.654|
 
 
 We again kept K=256. Similar to the above case, we again tested our model on same set of starting states. We trained our model with 100 epochs. 
 
 
-[scale=0.5]{expert_training.png}        
+![Image Random Training](./img/expert_training.png)  
 
 
 The following metrics were obtained at the end.
 
 
-    {c c c c}
-    & **Average path length** & **Average total reward** & **Maximum reward obtained**\\
-     **Random Policy** & 8.9 & 16.332 & 1.02\\
-    **Hopper-v2-random** & 18.52 & 20.807 & 1.9\\
-    **Hopper-v2-expert** & 25.4 & 91.645 & 3.4
+|&nbsp;|Average path length|Average total reward|Maximum reward obtained|
+|--|--|--|--|
+|Random Policy|8.9 |16.332 | 1.02|
+|Hopper-v2-random|  18.52 | 20.807 | 1.9|
+|Hopper-v2-expert|  25.4 | 91.645 | 3.4
 
 
 
 Below graph shows the reward progression of a trajectory from random policy and policy trained on Hopper-v2-expert.
 
 
-[scale=0.5]{expert_testing.png}    
+![Image Random Training](./img/expert_testing.png)
 
 
 # Conclusion and Future Works
