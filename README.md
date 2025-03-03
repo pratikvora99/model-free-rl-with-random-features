@@ -1,4 +1,4 @@
-# ELL729 - Stochastic Control and Reinforcement Learning
+# Model-free Reinforcement Learning that Transfers using Random Features
 
 This repo contains project done for course ELL729-Stochastic Control and Reinforcement Learning, taught by Prof. Arpan Chattopadhyay at IIT Delhi.
 
