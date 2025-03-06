@@ -45,40 +45,40 @@ At test time, the learned Q-functions can be used with any reward function, allo
 The approach is described step-by-step below in Algorithm- in more detail:
 
  **Input:** 
-1. Offline dataset D, where ![Equation](https://latex.codecogs.com/png.latex?D=\{(s_h^m,a_h^m,s_{h+1}^m)\}_{h\in[H],m\in[M]}), where `H` is the length of the trajectories, `M` is the total number of trajectories, ![Equation](https://latex.codecogs.com/png.latex?s_h^{m}) and ![Equation](https://latex.codecogs.com/png.latex?a_h^{m}) are the state and action taken respectively at the ![Equation](https://latex.codecogs.com/png.latex?h^{th}) timestep of the ![Equation](https://latex.codecogs.com/png.latex?m^{th}) trajectory - with the assumption that all transitions are collected under the same transition dynamics `T`.
+1. Offline dataset D, where $`D=\{(s_h^m,a_h^m,s_{h+1}^m)\}_{h\in[H],m\in[M]}`$, where `H` is the length of the trajectories, `M` is the total number of trajectories, $`s_h^{m}`$ and $`a_h^{m}`$ are the state and action taken respectively at the $`h^{th}`$ timestep of the $`m^{th}`$ trajectory - with the assumption that all transitions are collected under the same transition dynamics `T`.
 
-2. Distribution `p` over ![Equation](https://latex.codecogs.com/png.latex?R^d)
+2. Distribution `p` over $`R^d`$
 
 3. Number of random features `K`
 
 
  **Offline Training Phase:**
- 1. Randomly sample ![Equation](https://latex.codecogs.com/png.latex?\{\theta_k\}_{k\in[K]}) with ![Equation](https://latex.codecogs.com/png.latex?\theta_k\sim{p}) and construct the dataset: 
+ 1. Randomly sample $`\{\theta_k\}_{k\in[K]}`$ with $`\theta_k\sim{p}`$ and construct the dataset: 
 
-    ![Equation](https://latex.codecogs.com/png.latex?D_{\phi}=\\{((s_1^m,a_{1:H}^m),\sum_{h\in[H]}{\gamma^{h-1}\phi(s_h^m,a_h^m;\theta_k)})\\}_{m\in[M],k\in[K]})
+    $`D_{\phi}=\{((s_1^m,a_{1:H}^m),\sum_{h\in[H]}{\gamma^{h-1}\phi(s_h^m,a_h^m;\theta_k)})\}_{m\in[M],k\in[K]}`$
 
-Here, ![Equation](https://latex.codecogs.com/png.latex?\gamma) is the discount factor, i.e., ![Equation](https://latex.codecogs.com/png.latex?\gamma\in[0,1)), and ![Equation](https://latex.codecogs.com/png.latex?\phi(.,.;\theta_k)) is a neural network with weights ![Equation](https://latex.codecogs.com/png.latex?\theta_k\in{R^d}). 
+Here, $`\gamma`$ is the discount factor, i.e., $`\gamma\in[0,1)`$, and $`\phi(.,.;\theta_k)`$ is a neural network with weights $`\theta_k\in{R^d}`$. 
 
-2. Fit random Q-basis functions ![Equation](https://latex.codecogs.com/png.latex?\psi(.,.;\nu_k):S\times{A^H}\to{R}) for ![Equation](https://latex.codecogs.com/png.latex?k\in[K]) by minimizing the loss over the dataset ![Equation](https://latex.codecogs.com/png.latex?D_{\phi}), (where, `S` and `A` are the state and action space respectively):
+2. Fit random Q-basis functions $`\psi(.,.;\nu_k):S\times{A^H}\to{R}`$ for $`k\in[K]`$ by minimizing the loss over the dataset $`D_{\phi}`$, (where, `S` and `A` are the state and action space respectively):
 
 
-![Equation](https://latex.codecogs.com/png.latex?\\{\nu_k^*\\}_{k\in[K]}=argmin_{\\{\nu_k\\}_{k\in[K]}}{\frac{1}{M}}\sum_{m\in[M]}{(\psi(s_1^m,a_{1:H}^m;\nu_k)-\sum_{h\in[H]}{\gamma^{h-1}\phi(s_h^m,a_h^m;\theta_k)})^2})
+$`\{\nu_k^*\}_{k\in[K]}=argmin_{\{\nu_k\}_{k\in[K]}}{\frac{1}{M}}\sum_{m\in[M]}{(\psi(s_1^m,a_{1:H}^m;\nu_k)-\sum_{h\in[H]}{\gamma^{h-1}\phi(s_h^m,a_h^m;\theta_k)})^2})`$
 
 
  **Online Planning Phase:**
-1. Fit the testing task's reward function `$r(.,.)$` with linear regression on random features:
+1. Fit the testing task's reward function $`r(.,.)`$ with linear regression on random features:
 
 
-  ![Equation](https://latex.codecogs.com/png.latex?w^*=argmin_w{\frac{1}{MH}\sum_{h\in[H],m\in[M]}{(r(s_h^m,a_h^m)-\sum_{k\in[K]}{w_k\phi(s_h^m,a_h^m;\theta_k)})^2}+\lambda\|w\|^2})
+  $`w^*=argmin_w{\frac{1}{MH}\sum_{h\in[H],m\in[M]}{(r(s_h^m,a_h^m)-\sum_{k\in[K]}{w_k\phi(s_h^m,a_h^m;\theta_k)})^2}+\lambda\|w\|^2}`$
 
-2. Sample ![Equation](https://latex.codecogs.com/png.latex?s_1\in\mu_0)
+2. Sample $`s_1\in\mu_0`$
 
-3. Randomly generate `N` sequence of actions ![Equation](https://latex.codecogs.com/png.latex?\\{a_1^{n},...,a_H^{n}\\}_{n\in[N]})
+3. Randomly generate `N` sequence of actions $`\{a_1^{n},...,a_H^{n}\}_{n\in[N]}`$
 4. Find the best sequence such that
     
-    ![Equation](https://latex.codecogs.com/png.latex?n_t^*=argmax_{n\in[N]}{_{k\in[K]}{w_k^*(s_t,a_{1:H}^n;\nu_k^*)}})
+    $`n_t^*=argmax_{n\in[N]}{_{k\in[K]}{w_k^*(s_t,a_{1:H}^n;\nu_k^*)}}`$
     
-    Execute ![Equation](https://latex.codecogs.com/png.latex?a_t^{n_t^*}) from the sequence ![Equation](https://latex.codecogs.com/png.latex?n_t^*), observe the new state ![Equation](https://latex.codecogs.com/png.latex?s_{t+1}\in{T}(s_t,a_t^{n_t^*}))
+    Execute $`a_t^{n_t^*}`$ from the sequence $`n_t^*`$, observe the new state $`s_{t+1}\in{T}(s_t,a_t^{n_t^*})`$
     
 
 
